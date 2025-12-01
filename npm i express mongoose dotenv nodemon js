@@ -1,0 +1,46 @@
+npm i express mongoose dotenv nodemon jsonwebtoken cookie-parser bcryptjs validator cors  
+
+1- create server
+2- create .env
+3- create folder 
+    => model,controller,route,config,middleware
+4- setup mongodb
+5- in config create connectDb.js 
+6- in model create userSchema and model 
+7- auth controller [login,signup,logout]
+8- in config create token then in use authcontroller
+9- set cookie in index
+10- setup route  both in authRoute and index.js 
+11- test api [login,signup,logout]
+12- in middleware create isAuth.js 
+
+now start frontend 
+
+1- npm create vite@latest
+2- remove code 
+3- install tailwind 
+4- in public add logo , and index.html add  give title , icon both 
+5- add goggle font 
+6- create folder in src = Home,Login,SignUp
+7- npm i react-router-dom react-icons react-toastify react-spinners axios react-redux @reduxjs/toolkit
+8- setup route in App.jsx and wrap in main.jsx with browserrouter
+9- design signup page  & login page 
+10- in login add forget password features
+11- data collect in useState then, featch api [in backend index.js add cors ]  
+12- in App.js export serverUrl
+13- in btn setLoader
+14- also setup login page with fetch Api
+15- test signup , login 
+
+16- statemanagement with redux
+17- create store in src/store
+18- create userSlice in store
+19- in main.jsx wrap with provider and pass store
+20- in Backend create getUser controller / create userRoute 
+21- create custom hook forlder in src 
+22- getCurrentUser.js  set data in  userSlice 
+23- App.js call getCurrentUser 
+24- dispatch  setUserData in login and signup page
+
+25- create folder components in src
+26- create Navbar.jsx and setup navbar

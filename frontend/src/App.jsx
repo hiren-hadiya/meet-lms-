@@ -30,7 +30,7 @@ import AdminViewCourse from './Pages/admin/AdminViewCourse'
 import SearchResults from './Pages/SearchResults'
 
 
-export const serverUrl = "http://localhost:3000"
+export const serverUrl = "https://meet-lms-api.onrender.com"
 
 function App() {
   getCurrentUser();

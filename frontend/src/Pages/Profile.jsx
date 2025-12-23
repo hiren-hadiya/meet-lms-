@@ -55,7 +55,7 @@ function Profile() {
           <div className='text-sm flex items-center justify-start gap-2'>
             <span className='font-semibold text-gray-700'>Enrolled Courses:</span>
             {
-              userData?.user.role !== "admin" ? <span className='text-black'>{userData.user.enrolledCourses.length}</span> : <span>👍</span>
+              userData?.user.role !== "admin" ? <span className='text-black'>{userData.user.enrolledCourses.length}</span> : <span>view all course directly</span>
             }
           </div>
 

@@ -221,7 +221,7 @@ dispatch(addEnrolledCourse(courseId)); // ✅ add course ID to Redux
 
             {/* Highlights */}
             <ul className="text-sm text-gray-700 space-y-1 pt-2">
-              <li>✅ 10+ hours of video content</li>
+              {/* <li>✅ 10+ hours of video content</li> */}
               <li>✅ Lifetime access to course materials</li>
               
             </ul>

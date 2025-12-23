@@ -58,9 +58,17 @@ const courseSchema = new mongoose.Schema({
 rejectReason: { type: String, default: "" },
 isPublished: { type: Boolean, default: false },
 
-    pdf: {
-        type: String
-    },
+ 
+  pdfs: [
+    {
+      title: String,
+      pdfUrl: String,
+      uploadedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
     reviews: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Review'

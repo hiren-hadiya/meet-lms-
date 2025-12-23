@@ -1,41 +1,76 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import { FaPlayCircle } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { FaPlayCircle, FaFilePdf } from "react-icons/fa";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import Nav from '../component/Nav';
+import axios from "axios";
+import Nav from "../component/Nav";
+import { serverUrl } from "../App";
 
 function ViewLecture() {
   const { courseId } = useParams();
-  console.log(courseId)
+  const navigate = useNavigate();
+
   const { courseData } = useSelector((state) => state.course);
-  const {userData} = useSelector((state) => state.user)
-  const selectedCourse = courseData?.find((course) => course._id === courseId);
+
+  const selectedCourse = courseData?.find(
+    (course) => course._id === courseId
+  );
 
   const [selectedLecture, setSelectedLecture] = useState(
     selectedCourse?.lectures?.[0] || null
   );
-  const navigate = useNavigate()
-  const courseCreator = userData?.user._id === selectedCourse?.creator ? userData.user : null;
-// console.log(courseCreator)
+
+  const [coursePdfs, setCoursePdfs] = useState([]);
+
+  /* ================= FETCH COURSE PDFs ================= */
+  useEffect(() => {
+    const fetchCoursePdfs = async () => {
+      try {
+        const res = await axios.get(
+          `${serverUrl}/api/course/getcoursepdfs/${courseId}`,
+          { withCredentials: true }
+        );
+        setCoursePdfs(res.data.pdfs || []);
+      } catch (error) {
+        console.error("Failed to load course PDFs");
+      }
+    };
+
+    fetchCoursePdfs();
+  }, [courseId]);
+
+  /* ================= UPDATE LECTURE ON COURSE CHANGE ================= */
+  useEffect(() => {
+    if (selectedCourse?.lectures?.length > 0) {
+      setSelectedLecture(selectedCourse.lectures[0]);
+    }
+  }, [selectedCourse]);
 
   return (
     <div className="min-h-screen w-full bg-gray-50 py-6 flex flex-col md:flex-row gap-6">
-     <Nav/>
-      {/* Left - Video & Course Info */}
+      <Nav />
+
+      {/* ================= LEFT SECTION ================= */}
       <div className="w-full mt-12 md:w-2/3 bg-white rounded-2xl shadow-md p-6 border border-gray-200">
-        {/* Course Details */}
-        <div className="mb-6" >
-           
-          <h1 className="text-2xl font-bold flex items-center justify-start gap-[20px]  text-gray-800"><FaArrowLeftLong  className=' text-black w-[22px] h-[22px] cursor-pointer' onClick={()=>navigate("/")}/>{selectedCourse?.title}</h1>
-          
+        
+        {/* COURSE INFO */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold flex items-center gap-4 text-gray-800">
+            <FaArrowLeftLong
+              className="cursor-pointer"
+              onClick={() => navigate("/")}
+            />
+            {selectedCourse?.title}
+          </h1>
+
           <div className="mt-2 flex gap-4 text-sm text-gray-500 font-medium">
             <span>Category: {selectedCourse?.category}</span>
             <span>Level: {selectedCourse?.level}</span>
           </div>
         </div>
 
-        {/* Video Player */}
+        {/* VIDEO PLAYER */}
         <div className="aspect-video bg-black rounded-xl overflow-hidden mb-4 border border-gray-300">
           {selectedLecture?.videoUrl ? (
             <video
@@ -51,31 +86,38 @@ function ViewLecture() {
           )}
         </div>
 
-        {/* Selected Lecture Info */}
+        {/* LECTURE TITLE */}
         <div className="mt-2">
-          <h2 className="text-lg font-semibold text-gray-800">{selectedLecture?.lectureTitle}</h2>
-          
+          <h2 className="text-lg font-semibold text-gray-800">
+            {selectedLecture?.lectureTitle}
+          </h2>
         </div>
       </div>
 
-      {/* Right - All Lectures + Creator Info */}
+      {/* ================= RIGHT SECTION ================= */}
       <div className="w-full mt-12 md:w-1/3 bg-white rounded-2xl shadow-md p-6 border border-gray-200 h-fit">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">All Lectures</h2>
+        
+        {/* ALL LECTURES */}
+        <h2 className="text-xl font-bold mb-4 text-gray-800">
+          All Lectures
+        </h2>
+
         <div className="flex flex-col gap-3 mb-6">
           {selectedCourse?.lectures?.length > 0 ? (
-            selectedCourse.lectures.map((lecture, index) => (
+            selectedCourse.lectures.map((lecture) => (
               <button
-                key={index}
+                key={lecture._id}
                 onClick={() => setSelectedLecture(lecture)}
                 className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${
                   selectedLecture?._id === lecture._id
-                    ? 'bg-gray-200 border-gray-500'
-                    : 'hover:bg-gray-50 border-gray-300'
+                    ? "bg-gray-200 border-gray-500"
+                    : "hover:bg-gray-50 border-gray-300"
                 }`}
               >
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-800">{lecture.lectureTitle}</h4>
-                  
+                  <h4 className="text-sm font-semibold text-gray-800">
+                    {lecture.lectureTitle}
+                  </h4>
                 </div>
                 <FaPlayCircle className="text-black text-xl" />
               </button>
@@ -85,25 +127,39 @@ function ViewLecture() {
           )}
         </div>
 
-        {/* Creator Info */}
-        {/* {courseCreator && (
-  <div className="mt-4 border-t pt-4">
-    <h3 className="text-md font-semibold text-gray-700 mb-3">Instructor</h3>
-    <div className="flex items-center gap-4">
-      <img
-        src={courseCreator.photoUrl || '/default-avatar.png'}
-        alt="Instructor"
-        className="w-14 h-14 rounded-full object-cover border"
-      />
-      <div>
-        <h4 className="text-base font-medium text-gray-800">{courseCreator.name}</h4>
-        <p className="text-sm text-gray-600">
-          {courseCreator.description || 'No bio available.'}
-        </p>
-      </div>
-    </div>
-  </div>
-        )} */}
+        {/* ================= COURSE PDFs ================= */}
+        <div className="border-t pt-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800 flex items-center gap-2">
+            <FaFilePdf className="text-red-600" />
+            Course PDFs
+          </h2>
+
+          {coursePdfs.length === 0 && (
+            <p className="text-gray-500 text-sm">
+              No PDFs available for this course.
+            </p>
+          )}
+
+          <div className="flex flex-col gap-2">
+            {coursePdfs.map((pdf) => (
+              <a
+                key={pdf._id}
+                href={`${serverUrl}${pdf.pdfUrl}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-between p-3 rounded-lg border border-gray-300 hover:bg-gray-50 transition"
+              >
+                <span className="text-sm font-medium text-gray-700">
+                  📄 {pdf.title}
+                </span>
+                <span className="text-xs text-blue-600 font-semibold">
+                  Download
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+
       </div>
     </div>
   );

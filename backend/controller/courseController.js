@@ -2,7 +2,8 @@ import uploadOnCloudinary from "../config/cloudinary.js"
 import Course from "../model/courseModel.js"
 import Lecture from "../model/lectureModel.js"
 import User from "../model/userModel.js"
-
+import path from "path";
+import fs from "fs";
 // GET /api/course/search?query=javascript
 
 export const searchCourses = async (req, res) => {
@@ -454,6 +455,121 @@ export const getRejectedCourses = async (req, res) => {
   }
 };
 
+
+//PDF
+export const uploadCoursePdf = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { title } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "PDF file required" });
+    }
+
+    const pdfUpload = await uploadOnCloudinary(req.file.path);
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    course.pdfs.push({
+      title,
+      pdfUrl: pdfUpload
+    });
+
+    await course.save();
+
+    res.status(200).json({
+      message: "PDF uploaded successfully",
+      pdfs: course.pdfs
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "PDF upload failed" });
+  }
+};
+
+
+export const deleteCoursePdf = async (req, res) => {
+  try {
+    const { courseId, pdfId } = req.params;
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    const pdf = course.pdfs.id(pdfId);
+    if (!pdf) {
+      return res.status(404).json({ message: "PDF not found" });
+    }
+
+    // 🔥 delete file from /public
+    const filePath = path.join(process.cwd(), pdf.pdfUrl);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    pdf.deleteOne();
+    await course.save();
+
+    return res.status(200).json({
+      message: "PDF deleted successfully",
+      pdfs: course.pdfs
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to delete PDF" });
+  }
+};
+
+
+export const getCoursePdfs = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const course = await Course.findById(courseId).select("pdfs title");
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    return res.status(200).json({
+      courseTitle: course.title,
+      pdfs: course.pdfs
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to get course PDFs" });
+  }
+};
+
+// DOWNLOAD a PDF safely
+export const downloadPdf = async (req, res) => {
+  try {
+    const { pdfId } = req.params;
+
+    const course = await Course.findOne({ "pdfs._id": pdfId });
+    if (!course) return res.status(404).json({ message: "PDF not found" });
+
+    const pdf = course.pdfs.id(pdfId);
+
+    // Fetch file from Cloudinary
+    const response = await axios.get(pdf.pdfUrl, { responseType: "arraybuffer" });
+
+    // Send as attachment
+    res.setHeader("Content-Disposition", `attachment; filename="${pdf.title}.pdf"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(response.data);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to download PDF" });
+  }
+};
 
 
 

@@ -4,6 +4,9 @@ import isAuth from "../middleware/isAuth.js";
 import isAdmin from "../middleware/isAdmin.js";
 import upload from "../middleware/multer.js";
 
+// import upload from "../middleware/multer.js";
+// import { uploadCoursePdf } from "../controllers/courseController.js";
+
 import {
   createCourse,
   createLecture,
@@ -21,7 +24,11 @@ import {
   getPendingCourses,
   getApprovedCourses,
   getRejectedCourses,
-  searchCourses
+  searchCourses,
+  uploadCoursePdf,
+  deleteCoursePdf,
+  getCoursePdfs,
+  downloadPdf
 } from "../controller/courseController.js";
 
 const router = express.Router();
@@ -58,5 +65,26 @@ router.get("/admin/getcourse/:courseId", isAuth, getCourseById);
 
 router.get("/search", searchCourses)
 
+router.post(
+  "/uploadpdf/:courseId",
+  isAuth,
+  upload.single("pdf"),
+  uploadCoursePdf
+);
+
+router.delete(
+  "/deletepdf/:courseId/:pdfId",
+  isAuth,
+  deleteCoursePdf
+);
+
+router.get(
+  "/getcoursepdfs/:courseId",
+  isAuth,        // student login required
+  getCoursePdfs
+);
+
+// Download PDF safely
+router.get("/downloadpdf/:pdfId", isAuth, downloadPdf);
 
 export default router;

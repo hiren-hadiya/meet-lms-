@@ -43,7 +43,9 @@ function App() {
     <>
       <ToastContainer />
       <Routes>
-        <Route path='/' element={userData ? <Home /> : <Navigate to={"/login"} />} />
+        {/* <Route path='/' element={userData ? <Home /> : <Navigate to={"/login"} />} /> */}
+        <Route path='/' element={<Home />}></Route>
+
 
         <Route path='/login' element={!userData ? <Login /> : <Navigate to={"/"} />} />
 
